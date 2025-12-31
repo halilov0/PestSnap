@@ -141,6 +141,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser(String firstName, String lastName, String email, String password) {
+
         // TODO: Implement actual registration with backend/database
         // For now, simulate success
         Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
