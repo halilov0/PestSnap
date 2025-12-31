@@ -26,6 +26,28 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".QueueActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ResultsActivity"
+            android:exported="false" />
+
         <!-- Main/Launch Activity (you'll create this later) -->
         <activity
             android:name=".MainActivity"
