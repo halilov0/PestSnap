@@ -34,7 +34,6 @@ public class UserRepository {
                 long userId = userDao.insertUser(user);
 
                 if (userId > 0) {
-                    saveCurrentUserId((int) userId);
                     callback.onSuccess("User registered successfully");
                 } else {
                     callback.onError("Registration failed");
