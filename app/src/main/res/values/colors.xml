@@ -7,4 +7,14 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="primary">#218089</color>
+    <color name="primary_hover">#1a7480</color>
+    <color name="background">#fcfcf9</color>
+    <color name="surface">#ffffff</color>
+    <color name="text_primary">#134252</color>
+    <color name="text_secondary">#627077</color>
+    <color name="border">#335E5240</color> <color name="success_bg">#26218089</color>
+    <color name="error_bg">#1AC01530</color>
+    <color name="indicator_bg">#99000000</color>
 </resources>
