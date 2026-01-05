@@ -24,17 +24,18 @@
             android:textStyle="bold"
             android:textColor="#134252" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/backButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:text="Back"
-            android:textColor="#00897B"
+            android:textColor="#134252"
             android:textSize="14sp"
             android:textAllCaps="false"
-            app:cornerRadius="8dp"
-            app:strokeColor="#00897B" />
+            android:fontFamily="sans-serif"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/btn_outline_background" />
     </LinearLayout>
 
     <ScrollView
@@ -100,16 +101,17 @@
                 android:layout_marginBottom="16dp" />
 
             <!-- Upload All Button -->
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/uploadAllButton"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:text="Upload All"
                 android:textSize="16sp"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#00897B"
+                android:textColor="#FFFFFF"
                 android:textAllCaps="false"
-                app:cornerRadius="8dp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:background="@drawable/btn_primary_background"
                 android:layout_marginTop="16dp" />
 
             <!-- Info Text -->
