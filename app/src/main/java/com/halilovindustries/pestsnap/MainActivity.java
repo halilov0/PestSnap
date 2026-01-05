@@ -7,8 +7,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.halilovindustries.pestsnap.viewmodel.AuthViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +22,11 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recentTrapsRecyclerView;
     private TrapAdapter trapAdapter;
     private List<TrapItem> trapList;
+    private AuthViewModel authViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -72,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                authViewModel.logout();
                 startActivity(intent);
                 finish();
             }

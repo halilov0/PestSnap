@@ -10,9 +10,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.halilovindustries.pestsnap.viewmodel.AuthViewModel;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -20,9 +22,11 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputEditText firstNameInput, lastNameInput, emailInput, passwordInput, confirmPasswordInput;
     private Button createAccountButton, signInButton;
     private TextView backButton;
+    private AuthViewModel authViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
@@ -134,22 +138,21 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if (isValid) {
-            // TODO: Implement actual registration logic
-            // For now, just show success message
             registerUser(firstName, lastName, email, password);
         }
     }
 
     private void registerUser(String firstName, String lastName, String email, String password) {
 
-        // TODO: Implement actual registration with backend/database
-        // For now, simulate success
-        Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-
-        // Navigate to main screen or login
-        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-        startActivity(intent);
-        finish();
+        authViewModel.registerUser(firstName, lastName, email, password);
+        authViewModel.getAuthMessage().observe(RegisterActivity.this, message -> {
+            Toast.makeText(RegisterActivity.this, message, message.length()).show();
+            if("User registered successfully".equals(message)) {
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private boolean isValidEmail(String email) {
