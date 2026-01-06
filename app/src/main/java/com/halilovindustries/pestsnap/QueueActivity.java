@@ -179,9 +179,9 @@ public class QueueActivity extends AppCompatActivity {
                 }
             });
 
-            Intent intent = new Intent(QueueActivity.this, QueueActivity.class);
-            startActivity(intent);
-            finish();
+         //   Intent intent = new Intent(QueueActivity.this, QueueActivity.class);
+           // startActivity(intent);
+           // finish();
 
 
             //trapViewModel.getAllTraps(currentUserId).observe(this, traps -> {
