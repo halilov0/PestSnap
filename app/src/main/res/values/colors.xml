@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="primary">#00897B</color>
+    <color name="primary_variant">#00564D</color>
+    <color name="secondary">#00E5FF</color> <color name="bg_gradient_start">#F5F7FA</color>
+    <color name="bg_gradient_end">#E8ECF2</color>
+    <color name="surface_glass">#CCFFFFFF</color> <color name="surface_glass_border">#FFFFFF</color>
 
-    <color name="primary">#218089</color>
-    <color name="primary_hover">#1a7480</color>
-    <color name="background">#fcfcf9</color>
-    <color name="surface">#ffffff</color>
-    <color name="text_primary">#134252</color>
-    <color name="text_secondary">#627077</color>
-    <color name="border">#335E5240</color> <color name="success_bg">#26218089</color>
-    <color name="error_bg">#1AC01530</color>
-    <color name="indicator_bg">#99000000</color>
+    <color name="text_primary">#1A2C33</color>
+    <color name="text_secondary">#546E7A</color>
+    <color name="text_tertiary">#90A4AE</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="danger">#FF5252</color>
+    <color name="success_glow">#00C853</color>
+    <color name="nav_bar_background">#FFFFFF</color>
 </resources>
