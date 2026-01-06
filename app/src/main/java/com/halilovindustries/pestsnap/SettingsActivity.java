@@ -8,20 +8,25 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.halilovindustries.pestsnap.viewmodel.AuthViewModel;
 
 public class SettingsActivity extends AppCompatActivity {
 
     private SwitchMaterial switchDarkMode;
     private Button btnLogout;
+    private AuthViewModel authViewModel;
     private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_settings);
+        setContentView(R.layout.fragment_settings); // שים לב: זה Activity שטוען layout של פרגמנט, וודא שזה מכוון
 
+        // Initialize ViewModel
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
 
         initializeViews();
@@ -56,11 +61,22 @@ public class SettingsActivity extends AppCompatActivity {
             // Don't show toast - activity will recreate anyway
         });
 
-        // Logout Button
+        // Logout Button - LOGIC RESOLVED HERE
         btnLogout.setOnClickListener(v -> {
-            Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            // 1. ניקוי נתונים (מגרסת idan)
+            // זה החלק הכי חשוב - בגרסת main הפקודה הזו הייתה חסרה
+            authViewModel.logout();
+
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+
+            // 2. לאן עוברים? (מגרסת idan)
+            // עדיף לעבור ל-LoginActivity כדי שהמשתמש יתחבר מחדש, ולא ל-MainActivity
+            Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
+            
+            // 3. דגלים לניקוי היסטוריה (מגרסת idan)
+            // הדגלים האלו מוחקים את כל ההיסטוריה, כך שהמשתמש לא יכול ללחוץ "Back" ולחזור לאפליקציה
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            
             startActivity(intent);
             finish();
         });
