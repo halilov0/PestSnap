@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             } else if (itemId == R.id.nav_results) {
-                // TODO: Open Results
                 startActivity(new Intent(MainActivity.this, ResultsActivity.class));
                 //Toast.makeText(this, "Results coming soon", Toast.LENGTH_SHORT).show();
                 return true;
