@@ -10,48 +10,47 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.halilovindustries.pestsnap.LoginActivity;
+import com.halilovindustries.pestsnap.LoginActivity; // וודא שהנתיב נכון
 import com.halilovindustries.pestsnap.R;
 import com.halilovindustries.pestsnap.viewmodel.AuthViewModel;
 
 public class SettingsFragment extends Fragment {
-
+    
+    // לקחתי את הגדרת המשתנים ברמת המחלקה מגרסת idan כדי שתהיה גישה אליהם בכל הקובץ
     private SwitchMaterial switchDarkMode;
     private Button btnLogout;
     private AuthViewModel authViewModel;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        // Initialize ViewModel
+        // 1. אתחול ה-ViewModel (מגרסת idan)
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        // Initialize Views
+        // 2. אתחול ה-Views (מגרסת idan)
         switchDarkMode = view.findViewById(R.id.switchDarkMode);
         btnLogout = view.findViewById(R.id.btnLogout);
 
-        // Load Saved State (Check if user previously set dark mode)
+        // 3. טעינת מצב קיים (שילוב של השניים)
+        // בחרתי להשתמש במפתחות של idan ("AppSettings"), אך הוספתי שמירה קריטית מ-main בהמשך
         SharedPreferences sharedPref = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
         boolean isDarkMode = sharedPref.getBoolean("DARK_MODE", false);
         switchDarkMode.setChecked(isDarkMode);
 
-        // Dark Mode Logic
+        // 4. לוגיקה של מצב חשוך (שילוב: לוגיקה מ-idan + שמירה מ-main)
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Save the state
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean("DARK_MODE", isChecked);
-            editor.apply();
+            if (!buttonView.isPressed()) return;
 
-            // Apply the theme
+            // תוספת חשובה מגרסת main: שמירת המצב החדש בזיכרון!
+            sharedPref.edit().putBoolean("DARK_MODE", isChecked).apply();
+
+            // שינוי הנושא (Theme)
             if (isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
@@ -59,23 +58,23 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        // Logout Logic - FIXED VERSION
+        // 5. לוגיקה של התנתקות (מגרסת idan - כי היא המלאה והנכונה)
         if (btnLogout != null) {
             btnLogout.setOnClickListener(v -> {
-                // Clear authentication state FIRST
+                // ניקוי המצב ב-ViewModel
                 authViewModel.logout();
 
-                // Show toast
+                // הוד למשתמש
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
                 }
 
-                // Navigate to LoginActivity
+                // מעבר למסך התחברות
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
 
-                // Finish the current activity
+                // סגירת המסך הנוכחי
                 if (getActivity() != null) {
                     getActivity().finish();
                 }
