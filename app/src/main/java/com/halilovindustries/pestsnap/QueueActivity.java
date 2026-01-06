@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.halilovindustries.pestsnap.data.model.Trap;
@@ -170,7 +171,16 @@ public class QueueActivity extends AppCompatActivity {
             // For now, just a toast
             Toast.makeText(QueueActivity.this, "Uploading all...", Toast.LENGTH_SHORT).show();
             
-            // In real impl: Iterate over readyToUpload list and call uploadTrap for each
+            // In real impl: Iterate over readyToUpload list and call uploadTrap for
+            trapViewModel.getReadyToUploadTraps(currentUserId).observe(this, traps -> {
+                for (Trap trap : traps) {
+                    trapViewModel.uploadTrap(trap, String.valueOf(currentUserId));
+                }
+            });
+
+            //trapViewModel.getAllTraps(currentUserId).observe(this, traps -> {
+            //    updateSection(uploadingContainer, traps, "uploading");
+            //});
         });
     }
 }

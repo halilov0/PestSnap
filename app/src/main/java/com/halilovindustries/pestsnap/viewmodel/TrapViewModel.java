@@ -51,6 +51,8 @@ public class TrapViewModel extends AndroidViewModel {
 
             @Override
             public void onUploadError(String error) {
+                trap.setStatus("upload");
+                trapRepository.saveTrap(trap);
                 isUploading.postValue(false);
                 uploadMessage.postValue("Upload failed: " + error);
             }
@@ -70,7 +72,11 @@ public class TrapViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Trap>> getQueuedTraps(int userId) {
-        return trapRepository.getTrapsByStatus(userId, "uploaded");
+        return trapRepository.getTrapsByStatusIn(userId, List.of("uploaded", "analyzed"));
+    }
+
+    public LiveData<List<Trap>> getAllTraps(int userId) {
+        return trapRepository.getAllTraps(userId);
     }
 
     public LiveData<String> getUploadMessage() {

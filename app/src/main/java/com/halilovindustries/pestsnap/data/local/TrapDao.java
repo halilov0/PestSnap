@@ -38,4 +38,7 @@ public interface TrapDao {
 
     @Query("DELETE FROM traps WHERE id = :trapId")
     void deleteTrap(int trapId);
+
+    @Query("SELECT * FROM traps WHERE userId = :userId AND status in (:statuses)")
+    LiveData<List<Trap>> getTrapsByStatusIn(int userId, List<String> statuses);
 }

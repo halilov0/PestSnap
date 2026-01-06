@@ -52,6 +52,16 @@ public class TrapRepository {
         });
     }
 
+    public void saveTrap(Trap trap) {
+        executorService.execute(() -> {
+            long trapId = trapDao.insertTrap(trap);
+            if (trapId > 0) {
+                trap.setId((int) trapId);
+            }
+        });
+
+    }
+
     public LiveData<List<TrapWithResults>> getAllTrapsWithResults(int userId) {
         return trapDao.getTrapsWithResults(userId);
     }
@@ -60,13 +70,21 @@ public class TrapRepository {
         return trapDao.getTrapsByStatus(userId, status);
     }
 
+    public LiveData<List<Trap>> getTrapsByStatusIn(int userId, List<String> status) {
+        return trapDao.getTrapsByStatusIn(userId, status);
+    }
+
+
+    public LiveData<List<Trap>> getAllTraps(int userId) {
+        return trapDao.getAllTrapsByUser(userId);
+    }
+
     public void uploadTrap(Trap trap, String farmerId, TrapUploadCallback callback) {
         executorService.execute(() -> {
-            try {
                 // Update status to uploading
                 trap.setStatus("uploading");
                 trapDao.updateTrap(trap);
-
+            try {
                 // Convert image to Base64
                 String imageBase64 = encodeImageToBase64(trap.getImagePath());
 
@@ -93,7 +111,7 @@ public class TrapRepository {
                             callback.onUploadSuccess(response.body());
                         } else {
                             executorService.execute(() -> {
-                                trap.setStatus("captured");
+                             //   trap.setStatus("captured");
                                 trapDao.updateTrap(trap);
                             });
                             callback.onUploadError("Upload failed: " + response.code());
@@ -103,7 +121,7 @@ public class TrapRepository {
                     @Override
                     public void onFailure(Call<AnalysisResponse> call, Throwable t) {
                         executorService.execute(() -> {
-                            trap.setStatus("captured");
+                          //  trap.setStatus("captured");
                             trapDao.updateTrap(trap);
                         });
                         callback.onUploadError("Network error: " + t.getMessage());
@@ -111,9 +129,10 @@ public class TrapRepository {
                 });
 
             } catch (Exception e) {
-                trap.setStatus("captured");
-                trapDao.updateTrap(trap);
-                callback.onUploadError(e.getMessage());
+                executorService.execute(() -> {
+                    trap.setStatus("captured");
+                    trapDao.updateTrap(trap);
+                }); callback.onUploadError(e.getMessage());
             }
         });
     }
