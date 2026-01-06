@@ -8,45 +8,50 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.halilovindustries.pestsnap.LoginActivity;
 import com.halilovindustries.pestsnap.R;
+import com.halilovindustries.pestsnap.viewmodel.AuthViewModel;
 
 public class SettingsFragment extends Fragment {
 
     private SwitchMaterial switchDarkMode;
     private Button btnLogout;
+    private AuthViewModel authViewModel;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        // 1. Initialize Views
+        // Initialize ViewModel
+        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        // Initialize Views
         switchDarkMode = view.findViewById(R.id.switchDarkMode);
         btnLogout = view.findViewById(R.id.btnLogout);
 
-        // 2. Load Saved State (Check if user previously set dark mode)
+        // Load Saved State (Check if user previously set dark mode)
         SharedPreferences sharedPref = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
         boolean isDarkMode = sharedPref.getBoolean("DARK_MODE", false);
         switchDarkMode.setChecked(isDarkMode);
 
-        // 3. Dark Mode Logic
+        // Dark Mode Logic
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // Save the state
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean("DARK_MODE", isChecked);
             editor.apply();
 
-            // Apply the theme (This will recreate the activity to apply changes)
+            // Apply the theme
             if (isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
@@ -54,14 +59,25 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        // 4. Logout Logic
+        // Logout Logic - FIXED VERSION
         if (btnLogout != null) {
             btnLogout.setOnClickListener(v -> {
+                // Clear authentication state FIRST
+                authViewModel.logout();
+
+                // Show toast
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+                }
+
+                // Navigate to LoginActivity
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                if (getContext() != null) {
-                    Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+
+                // Finish the current activity
+                if (getActivity() != null) {
+                    getActivity().finish();
                 }
             });
         }
