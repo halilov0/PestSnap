@@ -2,9 +2,13 @@
 <resources>
     <color name="primary">#00897B</color>
     <color name="primary_variant">#00564D</color>
-    <color name="secondary">#00E5FF</color> <color name="bg_gradient_start">#F5F7FA</color>
+    <color name="secondary">#00E5FF</color>
+    
+    <color name="bg_gradient_start">#F5F7FA</color>
     <color name="bg_gradient_end">#E8ECF2</color>
-    <color name="surface_glass">#CCFFFFFF</color> <color name="surface_glass_border">#FFFFFF</color>
+    
+    <color name="surface_glass">#CCFFFFFF</color>
+    <color name="surface_glass_border">#FFFFFF</color>
 
     <color name="text_primary">#1A2C33</color>
     <color name="text_secondary">#546E7A</color>
@@ -15,4 +19,15 @@
     <color name="danger">#FF5252</color>
     <color name="success_glow">#00C853</color>
     <color name="nav_bar_background">#FFFFFF</color>
+
+    <color name="primary_hover">#1a7480</color>
+    <color name="background">#fcfcf9</color>
+    <color name="surface">#ffffff</color>
+    <color name="border">#335E5240</color>
+    <color name="success_bg">#26218089</color>
+    <color name="error_bg">#1AC01530</color>
+    <color name="indicator_bg">#99000000</color>
+    <color name="warning">#A84D2F</color>
+    <color name="success">#218089</color>
+    <color name="warning_bg">#26A84D2F</color>
 </resources>
