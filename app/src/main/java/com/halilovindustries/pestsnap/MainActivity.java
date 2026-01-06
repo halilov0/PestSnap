@@ -24,62 +24,59 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fabCapture;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // *** NEW: Check Dark Mode Preference BEFORE setting content view ***
-        SharedPreferences sharedPref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
-        boolean isDarkMode = sharedPref.getBoolean("DARK_MODE", false);
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
-        // ******************************************************************
-
-        setContentView(R.layout.activity_main);
-
-        initializeViews();
-        setupNavigation();
-
-        if (savedInstanceState == null) {
-            loadFragment(new HomeFragment());
-        }
-
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
-        FloatingActionButton fabCapture = findViewById(R.id.fabCapture);
-
-        // FAB - Open Camera
-        fabCapture.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, CameraActivity.class));
-        });
-
-        // Bottom Navigation
-        bottomNav.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.nav_home) {
-                // Already on home
-                return true;
-
-            } else if (itemId == R.id.nav_results) {
-                startActivity(new Intent(MainActivity.this, ResultsActivity.class));
-                //Toast.makeText(this, "Results coming soon", Toast.LENGTH_SHORT).show();
-                return true;
-
-            } else if (itemId == R.id.nav_queue) {
-                startActivity(new Intent(MainActivity.this, QueueActivity.class));
-                return true;
-
-            } else if (itemId == R.id.nav_settings) {
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                return true;
-            }
-
-            return false;
-        });
-    }
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState) {
+//        // APPLY SAVED DARK MODE SETTING BEFORE EVERYTHING
+//        SharedPreferences prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
+//        boolean isDarkMode = prefs.getBoolean("dark_mode", false);
+//        if (isDarkMode) {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//        } else {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//        }
+//
+//        super.onCreate(savedInstanceState);
+//        setContentView(R.layout.activity_main);
+//
+//        // LOAD HOME FRAGMENT ON START
+//        if (savedInstanceState == null) {
+//            getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.fragment_container, new HomeFragment())
+//                    .commit();
+//        }
+//
+//        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+//        FloatingActionButton fabCapture = findViewById(R.id.fabCapture);
+//
+//        fabCapture.setOnClickListener(v -> {
+//            startActivity(new Intent(MainActivity.this, CameraActivity.class));
+//        });
+//
+//        // Bottom Navigation
+//        bottomNav.setOnItemSelectedListener(item -> {
+//            int itemId = item.getItemId();
+//
+//            if (itemId == R.id.nav_home) {
+//                // Already on home
+//                return true;
+//
+//            } else if (itemId == R.id.nav_results) {
+//                startActivity(new Intent(MainActivity.this, ResultsActivity.class));
+//                //Toast.makeText(this, "Results coming soon", Toast.LENGTH_SHORT).show();
+//                return true;
+//
+//            } else if (itemId == R.id.nav_queue) {
+//                startActivity(new Intent(MainActivity.this, QueueActivity.class));
+//                return true;
+//
+//            } else if (itemId == R.id.nav_settings) {
+//                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+//                return true;
+//            }
+//
+//            return false;
+//        });
+//    }
 
     private void initializeViews() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
@@ -116,10 +113,56 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // APPLY SAVED DARK MODE SETTING
+        SharedPreferences prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
+        boolean isDarkMode = prefs.getBoolean("dark_mode", false);
+        AppCompatDelegate.setDefaultNightMode(isDarkMode ?
+                AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Load Home Fragment on start
+        if (savedInstanceState == null) {
+            loadFragment(new HomeFragment());
+        }
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+        FloatingActionButton fabCapture = findViewById(R.id.fabCapture);
+
+        // FAB opens Camera (separate activity)
+        fabCapture.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, CameraActivity.class));
+        });
+
+        // Bottom Navigation - USE FRAGMENTS, NOT ACTIVITIES
+        bottomNav.setOnItemSelectedListener(item -> {
+            Fragment fragment = null;
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                fragment = new HomeFragment();
+            } else if (itemId == R.id.nav_results) {
+                fragment = new ResultsFragment();
+            } else if (itemId == R.id.nav_queue) {
+                fragment = new QueueFragment();
+            } else if (itemId == R.id.nav_settings) {
+                fragment = new SettingsFragment();
+            }
+
+            if (fragment != null) {
+                loadFragment(fragment);
+                return true;
+            }
+            return false;
+        });
+    }
+
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.fragment_container, fragment)
                 .commit();
     }
