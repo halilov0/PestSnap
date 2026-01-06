@@ -1,80 +1,94 @@
 package com.halilovindustries.pestsnap;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.view.MenuItem;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.app.AppCompatDelegate; // Import this!
+import androidx.fragment.app.Fragment;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import com.halilovindustries.pestsnap.fragments.HomeFragment;
+import com.halilovindustries.pestsnap.fragments.ResultsFragment;
+import com.halilovindustries.pestsnap.fragments.QueueFragment;
+import com.halilovindustries.pestsnap.fragments.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button captureTrapButton, uploadQueueButton, logoutButton;
-    private RecyclerView recentTrapsRecyclerView;
-    private TrapAdapter trapAdapter;
-    private List<TrapItem> trapList;
+    private BottomNavigationView bottomNavigationView;
+    private FloatingActionButton fabCapture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // *** NEW: Check Dark Mode Preference BEFORE setting content view ***
+        SharedPreferences sharedPref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+        boolean isDarkMode = sharedPref.getBoolean("DARK_MODE", false);
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        // ******************************************************************
+
         setContentView(R.layout.activity_main);
 
         initializeViews();
-        setupRecyclerView();
-        setupClickListeners();
+        setupNavigation();
+
+        if (savedInstanceState == null) {
+            loadFragment(new HomeFragment());
+        }
     }
 
     private void initializeViews() {
-        captureTrapButton = findViewById(R.id.captureTrapButton);
-        uploadQueueButton = findViewById(R.id.uploadQueueButton);
-        logoutButton = findViewById(R.id.logoutButton);
-        recentTrapsRecyclerView = findViewById(R.id.recentTrapsRecyclerView);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        fabCapture = findViewById(R.id.fabCapture);
+        bottomNavigationView.getMenu().findItem(R.id.nav_placeholder).setEnabled(false);
     }
 
-    private void setupRecyclerView() {
-        trapList = new ArrayList<>();
+    private void setupNavigation() {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            Fragment fragment = null;
 
-        // Sample data
-        trapList.add(new TrapItem("Trap #1 - South Field", "Yesterday, 10:30 AM", "Complete", true));
-        trapList.add(new TrapItem("Trap #2 - West Greenhouse", "Yesterday, 08:15 AM", "Complete", true));
-        trapList.add(new TrapItem("Trap #3 - Center Field", "Today, 11:00 AM", "Complete", true));
+            if (id == R.id.nav_home) {
+                fragment = new HomeFragment();
+            } else if (id == R.id.nav_results) {
+                fragment = new ResultsFragment();
+            } else if (id == R.id.nav_queue) {
+                fragment = new QueueFragment();
+            } else if (id == R.id.nav_settings) {
+                fragment = new SettingsFragment();
+            }
 
-        trapAdapter = new TrapAdapter(trapList, this);
-        recentTrapsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recentTrapsRecyclerView.setAdapter(trapAdapter);
+            if (fragment != null) {
+                loadFragment(fragment);
+                return true;
+            }
+            return false;
+        });
+
+        fabCapture.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, CameraActivity.class);
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        });
     }
 
-    private void setupClickListeners() {
-        captureTrapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CameraActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        uploadQueueButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, QueueActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-            }
-        });
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.fragment_container, fragment)
+                .commit();
     }
 }

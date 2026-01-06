@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FCFCF9">
+    android:background="@color/background">
 
     <!-- Header -->
     <LinearLayout
@@ -23,7 +23,7 @@
             android:text="Results"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="#134252" />
+            android:textColor="@color/text_primary" />
 
         <Button
             android:id="@+id/backButton"
@@ -31,24 +31,19 @@
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:text="Back"
-            android:textColor="#00897B"
+            android:textColor="@color/primary"
             android:textSize="14sp"
             android:textAllCaps="false"
             app:cornerRadius="8dp"
-            app:strokeColor="#00897B" />
+            app:strokeColor="@color/primary" />
     </LinearLayout>
 
-    <!-- Results Container -->
-    <ScrollView
+    <!-- RecyclerView for Results -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/resultsRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
-            android:id="@+id/resultsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp" />
-    </ScrollView>
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:clipToPadding="false" />
 
 </LinearLayout>
