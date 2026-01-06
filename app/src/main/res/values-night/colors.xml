@@ -27,4 +27,6 @@
     <color name="fab_icon_tint">#FFFFFF</color>
     <color name="fab_stroke_color">#FFFFFF</color>
     <color name="fab_ripple">#33FFFFFF</color>
+
+    <color name="login_background">#000000</color>
 </resources>

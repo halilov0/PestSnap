@@ -23,10 +23,12 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_settings); // שים לב: זה Activity שטוען layout של פרגמנט, וודא שזה מכוון
+        setContentView(R.layout.fragment_settings);
 
         // Initialize ViewModel
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+        // FIXED: Using consistent SharedPreferences name
         prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
 
         initializeViews();
@@ -40,43 +42,34 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void loadDarkModeSetting() {
-        // Load saved preference without triggering listener
+        // Load saved preference - FIXED: Using consistent key name
         boolean isDarkMode = prefs.getBoolean("dark_mode", false);
         switchDarkMode.setChecked(isDarkMode);
     }
 
     private void setupListeners() {
-        // Dark Mode Toggle - with loop prevention
+        // Dark Mode Toggle - FIXED: Using ternary operator
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Only apply if user actually clicked (not programmatic change)
             if (!buttonView.isPressed()) return;
 
             prefs.edit().putBoolean("dark_mode", isChecked).apply();
 
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            }
-            // Don't show toast - activity will recreate anyway
+            // Using ternary operator (more concise)
+            AppCompatDelegate.setDefaultNightMode(
+                    isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+            );
         });
 
-        // Logout Button - LOGIC RESOLVED HERE
+        // Logout Button
         btnLogout.setOnClickListener(v -> {
-            // 1. ניקוי נתונים (מגרסת idan)
-            // זה החלק הכי חשוב - בגרסת main הפקודה הזו הייתה חסרה
+            // Clear authentication state
             authViewModel.logout();
 
             Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
 
-            // 2. לאן עוברים? (מגרסת idan)
-            // עדיף לעבור ל-LoginActivity כדי שהמשתמש יתחבר מחדש, ולא ל-MainActivity
+            // Navigate to LoginActivity
             Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
-            
-            // 3. דגלים לניקוי היסטוריה (מגרסת idan)
-            // הדגלים האלו מוחקים את כל ההיסטוריה, כך שהמשתמש לא יכול ללחוץ "Back" ולחזור לאפליקציה
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            
             startActivity(intent);
             finish();
         });

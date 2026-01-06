@@ -38,4 +38,6 @@
     <color name="warning">#A84D2F</color>
     <color name="success">#218089</color>
     <color name="warning_bg">#26A84D2F</color>
+    <color name="login_background">#FFFFFF</color>
+
 </resources>

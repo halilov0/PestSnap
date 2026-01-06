@@ -10,71 +10,70 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.halilovindustries.pestsnap.LoginActivity; // וודא שהנתיב נכון
+import com.halilovindustries.pestsnap.LoginActivity;
 import com.halilovindustries.pestsnap.R;
 import com.halilovindustries.pestsnap.viewmodel.AuthViewModel;
 
 public class SettingsFragment extends Fragment {
-    
-    // לקחתי את הגדרת המשתנים ברמת המחלקה מגרסת idan כדי שתהיה גישה אליהם בכל הקובץ
+
     private SwitchMaterial switchDarkMode;
     private Button btnLogout;
     private AuthViewModel authViewModel;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        // 1. אתחול ה-ViewModel (מגרסת idan)
+        // Initialize ViewModel
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        // 2. אתחול ה-Views (מגרסת idan)
+        // Initialize Views
         switchDarkMode = view.findViewById(R.id.switchDarkMode);
         btnLogout = view.findViewById(R.id.btnLogout);
 
-        // 3. טעינת מצב קיים (שילוב של השניים)
-        // בחרתי להשתמש במפתחות של idan ("AppSettings"), אך הוספתי שמירה קריטית מ-main בהמשך
-        SharedPreferences sharedPref = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
-        boolean isDarkMode = sharedPref.getBoolean("DARK_MODE", false);
+        // Load saved dark mode preference - FIXED: Using consistent key names
+        SharedPreferences sharedPref = requireActivity().getSharedPreferences("app_settings", Context.MODE_PRIVATE);
+        boolean isDarkMode = sharedPref.getBoolean("dark_mode", false);
         switchDarkMode.setChecked(isDarkMode);
 
-        // 4. לוגיקה של מצב חשוך (שילוב: לוגיקה מ-idan + שמירה מ-main)
+        // Dark Mode Toggle - FIXED: Using ternary operator for conciseness
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (!buttonView.isPressed()) return;
 
-            // תוספת חשובה מגרסת main: שמירת המצב החדש בזיכרון!
-            sharedPref.edit().putBoolean("DARK_MODE", isChecked).apply();
+            // Save the preference
+            sharedPref.edit().putBoolean("dark_mode", isChecked).apply();
 
-            // שינוי הנושא (Theme)
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            }
+            // Apply theme using ternary operator (more concise)
+            AppCompatDelegate.setDefaultNightMode(
+                    isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+            );
         });
 
-        // 5. לוגיקה של התנתקות (מגרסת idan - כי היא המלאה והנכונה)
+        // Logout Logic
         if (btnLogout != null) {
             btnLogout.setOnClickListener(v -> {
-                // ניקוי המצב ב-ViewModel
+                // Clear authentication state
                 authViewModel.logout();
 
-                // הוד למשתמש
+                // Show toast
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
                 }
 
-                // מעבר למסך התחברות
+                // Navigate to LoginActivity
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
 
-                // סגירת המסך הנוכחי
+                // Finish current activity
                 if (getActivity() != null) {
                     getActivity().finish();
                 }
