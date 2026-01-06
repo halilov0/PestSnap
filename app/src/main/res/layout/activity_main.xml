@@ -5,16 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FCFCF9"
+    android:background="@drawable/bg_screen_gradient"
     tools:context=".MainActivity">
 
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="80dp"
-        app:layout_anchor="@+id/fragment_container"
-        app:layout_anchorGravity="center" />
+        android:layout_marginBottom="60dp" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
@@ -26,6 +24,17 @@
         app:fabCradleRoundedCornerRadius="10dp"
         app:fabCradleVerticalOffset="0dp">
 
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            app:menu="@menu/bottom_nav_menu"
+            app:elevation="0dp"
+            app:labelVisibilityMode="labeled"
+            app:itemIconTint="@color/nav_item_colors"
+            app:itemTextColor="@color/nav_item_colors" />
+
     </com.google.android.material.bottomappbar.BottomAppBar>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -34,21 +43,9 @@
         android:layout_height="wrap_content"
         android:contentDescription="Capture Trap"
         app:srcCompat="@android:drawable/ic_menu_camera"
-        app:tint="@color/white"
-        app:backgroundTint="@color/primary"
+        app:backgroundTint="@color/fab_background"
+        app:tint="@color/fab_icon_tint"
+        app:rippleColor="@color/fab_ripple"
         app:layout_anchor="@id/bottomAppBar" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp"
-        app:itemIconTint="@color/primary"
-        app:itemTextColor="@color/text_primary"
-        app:labelVisibilityMode="labeled"
-        app:layout_anchor="@+id/bottomAppBar"
-        app:layout_anchorGravity="center"
-        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

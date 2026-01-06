@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PestSnap</string>
+    <string name="capture_trap">Capture Trap</string>
 </resources>
