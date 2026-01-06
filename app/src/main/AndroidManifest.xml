@@ -15,14 +15,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PestSnap">  <activity
-            android:name=".CameraActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.PestSnap" /> <activity android:name=".LoginActivity" android:exported="false"/>
+        android:name=".CameraActivity"
+        android:exported="false"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.PestSnap" /> <activity android:name=".LoginActivity" android:exported="false"/>
         <activity android:name=".RegisterActivity" android:exported="false"/>
         <activity android:name=".QueueActivity" android:exported="false"/>
         <activity android:name=".ResultsActivity" android:exported="false"/>
         <activity android:name=".QualityCheckActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".SettingsActivity" android:exported="false"/>
 
         <activity
             android:name=".MainActivity"

@@ -28,7 +28,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // *** NEW: Check Dark Mode Preference BEFORE setting content view ***
+        SharedPreferences sharedPref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+        boolean isDarkMode = sharedPref.getBoolean("DARK_MODE", false);
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        // ******************************************************************
+
         setContentView(R.layout.activity_main);
+
+        initializeViews();
+        setupNavigation();
+
+        if (savedInstanceState == null) {
+            loadFragment(new HomeFragment());
+        }
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         FloatingActionButton fabCapture = findViewById(R.id.fabCapture);
@@ -48,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
             } else if (itemId == R.id.nav_results) {
                 // TODO: Open Results
-                Toast.makeText(this, "Results coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MainActivity.this, ResultsActivity.class));
+                //Toast.makeText(this, "Results coming soon", Toast.LENGTH_SHORT).show();
                 return true;
 
             } else if (itemId == R.id.nav_queue) {
@@ -56,15 +74,13 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             } else if (itemId == R.id.nav_settings) {
-                // TODO: Open Settings
-                Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 return true;
             }
 
             return false;
         });
     }
-
 
     private void initializeViews() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
