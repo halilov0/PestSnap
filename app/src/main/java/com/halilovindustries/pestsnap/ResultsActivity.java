@@ -3,17 +3,26 @@ package com.halilovindustries.pestsnap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.halilovindustries.pestsnap.data.model.PestResult;
+import com.halilovindustries.pestsnap.data.model.Trap;
+import com.halilovindustries.pestsnap.data.model.TrapWithResults;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ResultsActivity extends AppCompatActivity {
 
     private TextView pageTitle;
     private Button backButton;
-    private LinearLayout resultsContainer;
+    private RecyclerView resultsRecyclerView;
+    private ResultsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +37,10 @@ public class ResultsActivity extends AppCompatActivity {
     private void initializeViews() {
         pageTitle = findViewById(R.id.pageTitle);
         backButton = findViewById(R.id.backButton);
-        resultsContainer = findViewById(R.id.resultsContainer);
+        resultsRecyclerView = findViewById(R.id.resultsRecyclerView);
+
+        // Setup RecyclerView
+        resultsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void loadResults() {
@@ -36,66 +48,58 @@ public class ResultsActivity extends AppCompatActivity {
         String trapTitle = getIntent().getStringExtra("trapTitle");
 
         if (trapTitle != null) {
-            // Show specific result
             pageTitle.setText("Result Details");
         } else {
-            // Show all results
             pageTitle.setText("Results");
         }
 
-        // Add sample results dynamically
-        addResultCard("Trap #1 - South Field", "Yesterday, 10:30 AM",
-                "Thrips (Frankliniella)", "8", "79%", null, false);
+        // Create sample data using your existing models
+        List<TrapWithResults> results = createSampleResults();
 
-        addResultCard("Trap #2 - West Greenhouse", "Yesterday, 08:15 AM",
-                "Leafminer (Liriomyza)", "42", "96%",
-                "High infestation detected. Immediate intervention recommended.", true);
-
-        addResultCard("Trap #3 - Center Field", "Today, 11:00 AM",
-                null, null, null,
-                "The field appears clear of infestation.", false);
+        // Set adapter
+        adapter = new ResultsAdapter(results);
+        resultsRecyclerView.setAdapter(adapter);
     }
 
-    private void addResultCard(String title, String timestamp, String pestName,
-                               String count, String confidence, String recommendation,
-                               boolean isWarning) {
-        View cardView = getLayoutInflater().inflate(R.layout.item_result_card, resultsContainer, false);
+    private List<TrapWithResults> createSampleResults() {
+        List<TrapWithResults> trapResults = new ArrayList<>();
 
-        TextView titleText = cardView.findViewById(R.id.resultTitle);
-        TextView timestampText = cardView.findViewById(R.id.resultTimestamp);
-        TextView pestNameText = cardView.findViewById(R.id.pestName);
-        TextView pestCountText = cardView.findViewById(R.id.pestCount);
-        LinearLayout pestSection = cardView.findViewById(R.id.pestSection);
-        LinearLayout noPestSection = cardView.findViewById(R.id.noPestSection);
-        TextView recommendationText = cardView.findViewById(R.id.recommendationText);
-        LinearLayout recommendationSection = cardView.findViewById(R.id.recommendationSection);
-        CardView mainCard = cardView.findViewById(R.id.mainResultCard);
+        // Trap 1 - Single pest detected
+        Trap trap1 = new Trap(1, "Trap #1 - South Field", "/path/image1.jpg",
+                31.2612, 34.7991, 4.2f, 95, true);
+        trap1.setId(1);
+        trap1.setStatus("analyzed");
+        trap1.setCapturedAt(System.currentTimeMillis() - 86400000); // Yesterday
 
-        titleText.setText(title);
-        timestampText.setText("Analyzed: " + timestamp);
+        PestResult pest1 = new PestResult(1, "Thrips", "Frankliniella",
+                8, 0.79f, null, false);
+        pest1.setAnalyzedAt(trap1.getCapturedAt());
 
-        if (pestName != null) {
-            pestSection.setVisibility(View.VISIBLE);
-            noPestSection.setVisibility(View.GONE);
-            pestNameText.setText(pestName);
-            pestCountText.setText("Count: " + count + " • Confidence: " + confidence);
-        } else {
-            pestSection.setVisibility(View.GONE);
-            noPestSection.setVisibility(View.VISIBLE);
-        }
+        trapResults.add(new TrapWithResults(trap1, Arrays.asList(pest1)));
 
-        if (recommendation != null) {
-            recommendationSection.setVisibility(View.VISIBLE);
-            recommendationText.setText(recommendation);
+        // Trap 2 - High infestation with warning
+        Trap trap2 = new Trap(1, "Trap #2 - West Greenhouse", "/path/image2.jpg",
+                31.2612, 34.7991, 3.8f, 92, true);
+        trap2.setId(2);
+        trap2.setStatus("analyzed");
+        trap2.setCapturedAt(System.currentTimeMillis() - 90000000);
 
-            if (isWarning) {
-                mainCard.setCardBackgroundColor(getResources().getColor(android.R.color.holo_red_light, null));
-            }
-        } else {
-            recommendationSection.setVisibility(View.GONE);
-        }
+        PestResult pest2 = new PestResult(2, "Leafminer", "Liriomyza",
+                42, 0.96f, "High infestation detected. Immediate intervention recommended.", true);
+        pest2.setAnalyzedAt(trap2.getCapturedAt());
 
-        resultsContainer.addView(cardView);
+        trapResults.add(new TrapWithResults(trap2, Arrays.asList(pest2)));
+
+        // Trap 3 - No pests detected
+        Trap trap3 = new Trap(1, "Trap #3 - Center Field", "/path/image3.jpg",
+                31.2612, 34.7991, 4.0f, 98, true);
+        trap3.setId(3);
+        trap3.setStatus("analyzed");
+        trap3.setCapturedAt(System.currentTimeMillis());
+
+        trapResults.add(new TrapWithResults(trap3, new ArrayList<>()));
+
+        return trapResults;
     }
 
     private void setupClickListeners() {
