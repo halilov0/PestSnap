@@ -28,26 +28,43 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // *** NEW: Check Dark Mode Preference BEFORE setting content view ***
-        SharedPreferences sharedPref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
-        boolean isDarkMode = sharedPref.getBoolean("DARK_MODE", false);
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
-        // ******************************************************************
-
         setContentView(R.layout.activity_main);
 
-        initializeViews();
-        setupNavigation();
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+        FloatingActionButton fabCapture = findViewById(R.id.fabCapture);
 
-        if (savedInstanceState == null) {
-            loadFragment(new HomeFragment());
-        }
+        // FAB - Open Camera
+        fabCapture.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, CameraActivity.class));
+        });
+
+        // Bottom Navigation
+        bottomNav.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                // Already on home
+                return true;
+
+            } else if (itemId == R.id.nav_results) {
+                // TODO: Open Results
+                Toast.makeText(this, "Results coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+
+            } else if (itemId == R.id.nav_queue) {
+                startActivity(new Intent(MainActivity.this, QueueActivity.class));
+                return true;
+
+            } else if (itemId == R.id.nav_settings) {
+                // TODO: Open Settings
+                Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            return false;
+        });
     }
+
 
     private void initializeViews() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
