@@ -1,5 +1,6 @@
 package com.halilovindustries.pestsnap;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -177,6 +178,11 @@ public class QueueActivity extends AppCompatActivity {
                     trapViewModel.uploadTrap(trap, String.valueOf(currentUserId));
                 }
             });
+
+            Intent intent = new Intent(QueueActivity.this, QueueActivity.class);
+            startActivity(intent);
+            finish();
+
 
             //trapViewModel.getAllTraps(currentUserId).observe(this, traps -> {
             //    updateSection(uploadingContainer, traps, "uploading");
