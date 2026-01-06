@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -71,6 +72,10 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+        );
         setContentView(R.layout.activity_camera);
 
         initializeViews();
@@ -78,8 +83,9 @@ public class CameraActivity extends AppCompatActivity {
         cameraExecutor = Executors.newSingleThreadExecutor();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
-        captureButton.setOnClickListener(v -> capturePhoto());
+
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -95,11 +101,12 @@ public class CameraActivity extends AppCompatActivity {
     private void initializeViews() {
         previewView = findViewById(R.id.previewView);
         captureButton = findViewById(R.id.captureButton);
-        btnBack = findViewById(R.id.btnBack);
+        // CHANGE THIS LINE - was Button, now ImageButton
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        //btnBack = findViewById(R.id.btnBack);
         qualityDebugText = findViewById(R.id.qualityDebugText);
-        
-        // מחקתי מכאן את השורות שמחפשות את btnGallery/btnZoomToggle
-        // כי הן גרמו לשגיאה (הכפתורים לא ב-XML)
+        captureButton.setOnClickListener(v -> capturePhoto());
+
     }
 
     private void startCamera() {
@@ -128,22 +135,24 @@ public class CameraActivity extends AppCompatActivity {
                 .setTargetRotation(getWindowManager().getDefaultDisplay().getRotation())
                 .build();
 
-        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build();
-
-        imageAnalysis.setAnalyzer(cameraExecutor, image -> {
-            analyzeImageQuality(image);
-            image.close();
-        });
+        // REMOVE OR COMMENT OUT THESE LINES:
+        // ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+        //         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+        //         .build();
+        // imageAnalysis.setAnalyzer(cameraExecutor, image -> {
+        //     analyzeImageQuality(image);
+        //     image.close();
+        // });
 
         try {
+            // Bind without imageAnalysis
             cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture, imageAnalysis);
+                    this, cameraSelector, preview, imageCapture);
         } catch (Exception e) {
             Log.e(TAG, "Use case binding failed", e);
         }
     }
+
 
     private void analyzeImageQuality(ImageProxy image) {
         // Mock logic
@@ -153,18 +162,15 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void updateQualityUI() {
-        String statusText = "Sharpness: " + sharpnessLevel + "% | Ready: " + (isTrapDetected ? "YES" : "NO");
+        String statusText = "Sharpness: " + sharpnessLevel + "% | Ready: YES";
         qualityDebugText.setText(statusText);
 
-        if (isTrapDetected) {
-            captureButton.setAlpha(1.0f);
-            captureButton.setEnabled(true);
-            qualityDebugText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
-        } else {
-            captureButton.setAlpha(0.7f);
-            qualityDebugText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_orange_light));
-        }
+        // Keep button always enabled and visible
+        captureButton.setAlpha(1.0f);
+        captureButton.setEnabled(true);
+        qualityDebugText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
     }
+
 
     private void capturePhoto() {
         if (imageCapture == null) return;
