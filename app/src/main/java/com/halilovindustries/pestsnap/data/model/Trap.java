@@ -17,6 +17,7 @@ public class Trap {
     private float imageSize; // in MB
     private int sharpnessScore;
     private boolean isQualityPassed;
+    private int remoteId;
 
     public Trap(int userId, String title, String imagePath, double latitude,
                 double longitude, float imageSize, int sharpnessScore, boolean isQualityPassed) {
@@ -55,4 +56,12 @@ public class Trap {
     public void setSharpnessScore(int sharpnessScore) { this.sharpnessScore = sharpnessScore; }
     public boolean isQualityPassed() { return isQualityPassed; }
     public void setQualityPassed(boolean qualityPassed) { isQualityPassed = qualityPassed; }
+
+    public int getRemoteId() {
+        return remoteId;
+    }
+
+    public void setRemoteId(int remoteId) {
+        this.remoteId = remoteId;
+    }
 }

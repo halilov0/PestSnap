@@ -9,6 +9,7 @@ import androidx.room.Update;
 
 import com.halilovindustries.pestsnap.data.model.Trap;
 import com.halilovindustries.pestsnap.data.model.TrapWithResults;
+import androidx.room.OnConflictStrategy;
 
 import java.util.List;
 

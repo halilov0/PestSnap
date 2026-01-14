@@ -41,20 +41,22 @@ public class TrapViewModel extends AndroidViewModel {
     }
 
     public void uploadTrap(Trap trap, String farmerId) {
-        isUploading.setValue(true);
+        isUploading.setValue(true); // שים לב: setValue עובד רק ב-Main Thread, אם אתה ברקע השתמש ב-postValue
+
         trapRepository.uploadTrap(trap, farmerId, new TrapRepository.TrapUploadCallback() {
+
+            // --- התיקון כאן: משנים את החתימה לקבלת int ---
             @Override
-            public void onUploadSuccess(AnalysisResponse response) {
+            public void onUploadSuccess(int serverId) {
                 isUploading.postValue(false);
-                uploadMessage.postValue("Upload successful! Analysis complete.");
+                // בשלב הזה קיבלנו רק אישור שהתמונה עלתה + מזהה. האנליזה תגיע אחר כך.
+                uploadMessage.postValue("Upload successful! Trap ID: " + serverId);
             }
 
             @Override
             public void onUploadError(String error) {
-                trap.setStatus("upload");
-                trapRepository.saveTrap(trap);
                 isUploading.postValue(false);
-                uploadMessage.postValue("Upload failed: " + error);
+                uploadMessage.postValue("Error: " + error);
             }
         });
     }
@@ -85,5 +87,9 @@ public class TrapViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getIsUploading() {
         return isUploading;
+    }
+
+    // saves the trap to the database
+    public void update(Trap trap) {
     }
 }

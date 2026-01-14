@@ -10,7 +10,7 @@ import com.halilovindustries.pestsnap.data.model.PestResult;
 import com.halilovindustries.pestsnap.data.model.Trap;
 import com.halilovindustries.pestsnap.data.model.User;
 
-@Database(entities = {User.class, Trap.class, PestResult.class}, version = 1, exportSchema = false)
+@Database(entities = {User.class, Trap.class, PestResult.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase instance;
