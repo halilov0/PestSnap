@@ -1,8 +1,6 @@
 package com.halilovindustries.pestsnap.data.repository;
 
 import android.content.Context;
-import android.util.Base64;
-
 import androidx.lifecycle.LiveData;
 
 import com.halilovindustries.pestsnap.data.local.AppDatabase;
@@ -14,14 +12,19 @@ import com.halilovindustries.pestsnap.data.model.TrapWithResults;
 import com.halilovindustries.pestsnap.data.remote.ApiClient;
 import com.halilovindustries.pestsnap.data.remote.STARdbiApi;
 import com.halilovindustries.pestsnap.data.remote.model.AnalysisResponse;
-import com.halilovindustries.pestsnap.data.remote.model.UploadRequest;
+import com.halilovindustries.pestsnap.data.remote.model.UploadResponse; // וודא שיצרת את המחלקה הזו קודם
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,12 +39,14 @@ public class TrapRepository {
         AppDatabase database = AppDatabase.getInstance(context);
         trapDao = database.trapDao();
         pestResultDao = database.pestResultDao();
+        // ה-ApiClient המעודכן שלנו כבר מכיל את התיקון ל-SSL
         apiService = ApiClient.getApiService();
         executorService = Executors.newSingleThreadExecutor();
     }
 
     public void saveTrap(Trap trap, TrapCallback callback) {
         executorService.execute(() -> {
+            // שים לב: ב-Dao הוספנו REPLACE, אז זה יעבוד גם לעדכון
             long trapId = trapDao.insertTrap(trap);
             if (trapId > 0) {
                 trap.setId((int) trapId);
@@ -54,12 +59,12 @@ public class TrapRepository {
 
     public void saveTrap(Trap trap) {
         executorService.execute(() -> {
-            long trapId = trapDao.insertTrap(trap);
-            if (trapId > 0) {
-                trap.setId((int) trapId);
-            }
+            trapDao.insertTrap(trap);
         });
+    }
 
+    public void update(Trap trap) {
+        executorService.execute(() -> trapDao.updateTrap(trap));
     }
 
     public LiveData<List<TrapWithResults>> getAllTrapsWithResults(int userId) {
@@ -74,93 +79,109 @@ public class TrapRepository {
         return trapDao.getTrapsByStatusIn(userId, status);
     }
 
+    public LiveData<List<Trap>> getReadyToUploadTraps(int userId) {
+        return getTrapsByStatus(userId, "captured"); // או "ready" תלוי בערך ששמרת
+    }
+
+    public LiveData<List<Trap>> getUploadingTraps(int userId) {
+        return getTrapsByStatus(userId, "uploading");
+    }
+
+    public LiveData<List<Trap>> getQueuedTraps(int userId) {
+        return getTrapsByStatus(userId, "uploaded"); // או "queued"
+    }
 
     public LiveData<List<Trap>> getAllTraps(int userId) {
         return trapDao.getAllTrapsByUser(userId);
     }
 
+    // --- הפונקציה המתוקנת להעלאה ---
     public void uploadTrap(Trap trap, String farmerId, TrapUploadCallback callback) {
         executorService.execute(() -> {
-                // Update status to uploading
-                trap.setStatus("uploading");
-                trapDao.updateTrap(trap);
+            // 1. עדכון סטטוס מקומי
+            trap.setStatus("uploading");
+            trapDao.updateTrap(trap);
+
             try {
-                // Convert image to Base64
-                String imageBase64 = encodeImageToBase64(trap.getImagePath());
+                File file = new File(trap.getImagePath());
+                if (!file.exists()) {
+                    handleUploadFailure(trap, "File not found", callback);
+                    return;
+                }
 
-                // Create upload request
-                UploadRequest request = new UploadRequest(
-                        farmerId,
-                        trap.getLatitude(),
-                        trap.getLongitude(),
-                        trap.getCapturedAt(),
-                        imageBase64
-                );
+                // 2. הכנת ה-Multipart Request
+                RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
+                MultipartBody.Part imageBody = MultipartBody.Part.createFormData("image", file.getName(), requestFile);
 
-                // Upload to STARdbi
-                Call<AnalysisResponse> call = apiService.uploadTrap(request);
-                call.enqueue(new Callback<AnalysisResponse>() {
+                String gpsString = trap.getLatitude() + "," + trap.getLongitude();
+                RequestBody gps = RequestBody.create(MediaType.parse("text/plain"), gpsString);
+
+                // המרת הזמן לפורמט קריא
+                String timeString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+                        .format(new Date(trap.getCapturedAt()));
+                RequestBody timestamp = RequestBody.create(MediaType.parse("text/plain"), timeString);
+
+                RequestBody userId = RequestBody.create(MediaType.parse("text/plain"), farmerId);
+
+                // 3. ביצוע הקריאה
+                Call<UploadResponse> call = apiService.uploadTrap(imageBody, gps, timestamp, userId);
+
+                call.enqueue(new Callback<UploadResponse>() {
                     @Override
-                    public void onResponse(Call<AnalysisResponse> call, Response<AnalysisResponse> response) {
+                    public void onResponse(Call<UploadResponse> call, Response<UploadResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             executorService.execute(() -> {
-                                trap.setStatus("analyzed");
+                                // הצלחה!
+                                trap.setStatus("uploaded"); // או "queued"
+                                trap.setRemoteId(response.body().getId()); // שמירת ה-ID מהשרת
                                 trapDao.updateTrap(trap);
-                                saveAnalysisResults(trap.getId(), response.body());
                             });
-                            callback.onUploadSuccess(response.body());
+                            // שים לב: אנחנו מחזירים פה ID, לא תוצאות אנליזה
+                            callback.onUploadSuccess(response.body().getId());
                         } else {
-                            executorService.execute(() -> {
-                             //   trap.setStatus("captured");
-                                trapDao.updateTrap(trap);
-                            });
-                            callback.onUploadError("Upload failed: " + response.code());
+                            handleUploadFailure(trap, "Upload failed: " + response.code(), callback);
                         }
                     }
 
                     @Override
-                    public void onFailure(Call<AnalysisResponse> call, Throwable t) {
-                        executorService.execute(() -> {
-                          //  trap.setStatus("captured");
-                            trapDao.updateTrap(trap);
-                        });
-                        callback.onUploadError("Network error: " + t.getMessage());
+                    public void onFailure(Call<UploadResponse> call, Throwable t) {
+                        handleUploadFailure(trap, "Network error: " + t.getMessage(), callback);
                     }
                 });
 
             } catch (Exception e) {
-                executorService.execute(() -> {
-                    trap.setStatus("captured");
-                    trapDao.updateTrap(trap);
-                }); callback.onUploadError(e.getMessage());
+                handleUploadFailure(trap, e.getMessage(), callback);
             }
         });
     }
 
-    private void saveAnalysisResults(int trapId, AnalysisResponse response) {
-        if (response.getDetectedPests() != null) {
-            for (AnalysisResponse.DetectedPest pest : response.getDetectedPests()) {
-                PestResult result = new PestResult(
-                        trapId,
-                        pest.getCommonName(),
-                        pest.getScientificName(),
-                        pest.getCount(),
-                        pest.getConfidence(),
-                        response.getRecommendation(),
-                        response.isRequiresAction()
-                );
-                pestResultDao.insertPestResult(result);
-            }
-        }
+    // פונקציית עזר לטיפול בכישלון
+    private void handleUploadFailure(Trap trap, String errorMsg, TrapUploadCallback callback) {
+        executorService.execute(() -> {
+            trap.setStatus("captured"); // החזרה לסטטוס שמאפשר ניסיון חוזר
+            trapDao.updateTrap(trap);
+        });
+        callback.onUploadError(errorMsg);
     }
 
-    private String encodeImageToBase64(String imagePath) throws Exception {
-        File file = new File(imagePath);
-        FileInputStream fis = new FileInputStream(file);
-        byte[] bytes = new byte[(int) file.length()];
-        fis.read(bytes);
-        fis.close();
-        return Base64.encodeToString(bytes, Base64.DEFAULT);
+    // פונקציה לשמירת תוצאות (תשמש אותך בהמשך כשתבדוק סטטוס)
+    public void saveAnalysisResults(int trapId, AnalysisResponse response) {
+        executorService.execute(() -> {
+            if (response.getDetectedPests() != null) {
+                for (AnalysisResponse.DetectedPest pest : response.getDetectedPests()) {
+                    PestResult result = new PestResult(
+                            trapId,
+                            pest.getCommonName(),
+                            pest.getScientificName(),
+                            pest.getCount(),
+                            pest.getConfidence(),
+                            response.getRecommendation(),
+                            response.isRequiresAction()
+                    );
+                    pestResultDao.insertPestResult(result);
+                }
+            }
+        });
     }
 
     public interface TrapCallback {
@@ -168,8 +189,9 @@ public class TrapRepository {
         void onError(String error);
     }
 
+    // עדכנתי את הממשק שיקבל ID במקום אובייקט אנליזה מלא
     public interface TrapUploadCallback {
-        void onUploadSuccess(AnalysisResponse response);
+        void onUploadSuccess(int remoteId);
         void onUploadError(String error);
     }
 }
