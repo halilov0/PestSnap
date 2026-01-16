@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/white">
+    android:background="@color/login_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -153,7 +153,7 @@
             android:layout_marginTop="24dp"
             android:text="Create Account"
             android:textSize="16sp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/login_background"
             android:backgroundTint="#00897B"
             android:textAllCaps="false"
             app:cornerRadius="8dp"
