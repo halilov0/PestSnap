@@ -124,13 +124,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Load Home Fragment on start
-        if (savedInstanceState == null) {
+        // CHANGE: Initialize the FIELD variable, not a local one
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        fabCapture = findViewById(R.id.fabCapture);
+
+        // Load Home Fragment on start ONLY if no special intent
+        if (savedInstanceState == null && getIntent().getStringExtra("open_tab") == null) {
             loadFragment(new HomeFragment());
         }
-
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
-        FloatingActionButton fabCapture = findViewById(R.id.fabCapture);
 
         // FAB opens Camera (separate activity)
         fabCapture.setOnClickListener(v -> {
@@ -138,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Bottom Navigation - USE FRAGMENTS, NOT ACTIVITIES
-        bottomNav.setOnItemSelectedListener(item -> {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment fragment = null;
             int itemId = item.getItemId();
 
@@ -156,8 +157,27 @@ public class MainActivity extends AppCompatActivity {
                 loadFragment(fragment);
                 return true;
             }
+
             return false;
         });
+
+        // IMPORTANT: Call this AFTER bottomNavigationView is initialized
+        handleIncomingIntent();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // Update the intent
+        handleIncomingIntent(); // Handle the new intent
+    }
+
+    private void handleIncomingIntent() {
+        String openTab = getIntent().getStringExtra("open_tab");
+        if ("queue".equals(openTab)) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_queue);
+            loadFragment(new QueueFragment());
+        }
     }
 
     private void loadFragment(Fragment fragment) {

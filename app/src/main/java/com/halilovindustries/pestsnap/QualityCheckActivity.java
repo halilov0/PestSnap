@@ -2,6 +2,7 @@ package com.halilovindustries.pestsnap;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ public class QualityCheckActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_quality_check);
 
         // 1. Get Data from Intent
@@ -104,12 +106,13 @@ public class QualityCheckActivity extends AppCompatActivity {
             public void onSuccess(Trap trap) {
                 runOnUiThread(() -> {
                     Toast.makeText(QualityCheckActivity.this, "Trap Saved!", Toast.LENGTH_SHORT).show();
-                    // Navigate to Queue (Capture Management)
-                    Intent intent = new Intent(QualityCheckActivity.this, QueueActivity.class);
-                    // Clear stack so back button goes to Home, not Quality Check
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    // Navigate to MainActivity and open Queue tab
+                    Intent intent = new Intent(QualityCheckActivity.this, MainActivity.class);
+                    intent.putExtra("open_tab", "queue"); // Tell MainActivity to open Queue tab
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                     finish();
+
                 });
             }
 
