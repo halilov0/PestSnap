@@ -24,6 +24,7 @@ import com.halilovindustries.pestsnap.data.repository.UserRepository;
 import com.halilovindustries.pestsnap.viewmodel.TrapViewModel;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,6 +36,9 @@ public class QueueFragment extends Fragment {
     private TrapViewModel trapViewModel;
     private UserRepository userRepository;
     private int currentUserId;
+
+    // Store the current ready traps to avoid observer loops
+    private List<Trap> currentReadyTraps = new ArrayList<>();
 
     @Nullable
     @Override
@@ -73,7 +77,9 @@ public class QueueFragment extends Fragment {
     }
 
     private void observeTraps() {
+        // Observe "Ready to Upload" and save to local list
         trapViewModel.getReadyToUploadTraps(currentUserId).observe(getViewLifecycleOwner(), traps -> {
+            this.currentReadyTraps = traps != null ? traps : new ArrayList<>();
             updateSection(readyToUploadContainer, traps, "ready");
         });
 
@@ -170,15 +176,20 @@ public class QueueFragment extends Fragment {
 
     private void setupClickListeners() {
         uploadAllButton.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Uploading all...", Toast.LENGTH_SHORT).show();
+            // Check if there are traps to upload
+            if (currentReadyTraps == null || currentReadyTraps.isEmpty()) {
+                Toast.makeText(requireContext(), "Nothing to upload", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            trapViewModel.getReadyToUploadTraps(currentUserId).observe(getViewLifecycleOwner(), traps -> {
-                if (traps != null) {
-                    for (Trap trap : traps) {
-                        trapViewModel.uploadTrap(trap, String.valueOf(currentUserId));
-                    }
-                }
-            });
+            Toast.makeText(requireContext(),
+                    "Uploading " + currentReadyTraps.size() + " items...",
+                    Toast.LENGTH_SHORT).show();
+
+            // Upload from the cached list, NOT creating a new observer
+            for (Trap trap : currentReadyTraps) {
+                trapViewModel.uploadTrap(trap, String.valueOf(currentUserId));
+            }
         });
     }
 }
