@@ -29,4 +29,16 @@
     <color name="fab_ripple">#33FFFFFF</color>
 
     <color name="login_background">#000000</color>
+
+    <!-- ADD THESE MISSING COLORS -->
+    <color name="primary_hover">#4DB6AC</color>
+    <color name="background">#121212</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="border">#33FFFFFF</color>
+    <color name="success_bg">#1A69F0AE</color>
+    <color name="error_bg">#1AFF5252</color>
+    <color name="indicator_bg">#99FFFFFF</color>
+    <color name="warning">#FFB74D</color>
+    <color name="success">#69F0AE</color>
+    <color name="warning_bg">#1AFFB74D</color>
 </resources>
