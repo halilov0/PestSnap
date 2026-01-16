@@ -64,9 +64,9 @@ public class SettingsFragment extends Fragment {
                 authViewModel.logout();
 
                 // Show toast
-                if (getContext() != null) {
-                    Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-                }
+//                if (getContext() != null) {
+//                    Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+//                }
 
                 // Navigate to LoginActivity
                 Intent intent = new Intent(getActivity(), LoginActivity.class);

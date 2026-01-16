@@ -165,11 +165,11 @@ public class QueueActivity extends AppCompatActivity {
     private void uploadTrapToServer(Trap trap) {
         File file = new File(trap.getImagePath());
         if (!file.exists()) {
-            Toast.makeText(this, "File not found!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "File not found!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Toast.makeText(this, "Uploading " + trap.getTitle() + "...", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Uploading " + trap.getTitle() + "...", Toast.LENGTH_SHORT).show();
 
         // 1. הכנת התמונה (MultipartBody.Part)
         // המפתח "image" חייב להתאים למה שמוגדר ב-STARdbiApi וב-PDF
