@@ -204,7 +204,6 @@ public class QueueActivity extends AppCompatActivity {
                     // שמירה במסד הנתונים
                     trapViewModel.update(trap);
 
-                    Toast.makeText(QueueActivity.this, "Upload Success! ID: " + remoteId, Toast.LENGTH_SHORT).show();
                 } else {
                     // כישלון (למשל 400 או 404 אם השרת לא מוכן)
                     Toast.makeText(QueueActivity.this, "Upload Failed: " + response.code(), Toast.LENGTH_LONG).show();
@@ -225,11 +224,9 @@ public class QueueActivity extends AppCompatActivity {
 
         uploadAllButton.setOnClickListener(v -> {
             if (currentReadyTraps.isEmpty()) {
-                Toast.makeText(this, "Nothing to upload", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            Toast.makeText(this, "Uploading " + currentReadyTraps.size() + " items...", Toast.LENGTH_SHORT).show();
 
             for (Trap trap : currentReadyTraps) {
                 uploadTrapToServer(trap);

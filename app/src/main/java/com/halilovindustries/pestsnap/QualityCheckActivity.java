@@ -105,7 +105,6 @@ public class QualityCheckActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Trap trap) {
                 runOnUiThread(() -> {
-                    Toast.makeText(QualityCheckActivity.this, "Trap Saved!", Toast.LENGTH_SHORT).show();
                     // Navigate to MainActivity and open Queue tab
                     Intent intent = new Intent(QualityCheckActivity.this, MainActivity.class);
                     intent.putExtra("open_tab", "queue"); // Tell MainActivity to open Queue tab

@@ -160,9 +160,6 @@ public class QueueFragment extends Fragment {
                 if (type.equals("ready")) {
                     itemUploadBtn.setVisibility(View.VISIBLE);
                     itemUploadBtn.setOnClickListener(v -> {
-                        Toast.makeText(requireContext(),
-                                "Starting upload for " + trap.getTitle(),
-                                Toast.LENGTH_SHORT).show();
                         trapViewModel.uploadTrap(trap, String.valueOf(currentUserId));
                     });
                 } else {
@@ -178,13 +175,8 @@ public class QueueFragment extends Fragment {
         uploadAllButton.setOnClickListener(v -> {
             // Check if there are traps to upload
             if (currentReadyTraps == null || currentReadyTraps.isEmpty()) {
-                Toast.makeText(requireContext(), "Nothing to upload", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            Toast.makeText(requireContext(),
-                    "Uploading " + currentReadyTraps.size() + " items...",
-                    Toast.LENGTH_SHORT).show();
 
             // Upload from the cached list, NOT creating a new observer
             for (Trap trap : currentReadyTraps) {
