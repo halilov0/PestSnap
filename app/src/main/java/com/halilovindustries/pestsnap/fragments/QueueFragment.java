@@ -21,8 +21,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.halilovindustries.pestsnap.R;
 import com.halilovindustries.pestsnap.data.model.Trap;
 import com.halilovindustries.pestsnap.data.repository.UserRepository;
+import com.halilovindustries.pestsnap.utils.NetworkUtils;
 import com.halilovindustries.pestsnap.viewmodel.TrapViewModel;
-
+import com.halilovindustries.pestsnap.data.model.TrapWithResults;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,25 +71,42 @@ public class QueueFragment extends Fragment {
         uploadingContainer = view.findViewById(R.id.uploadingContainer);
         queuedContainer = view.findViewById(R.id.queuedContainer);
 
-        // Hide back button in fragment (we're using bottom nav)
         if (backButton != null) {
             backButton.setVisibility(View.GONE);
         }
     }
 
+    // משתנה עזר לשמירת שמות המלכודות שכבר סיימו
+    private List<String> finishedTrapTitles = new ArrayList<>();
+    private List<Trap> currentQueuedTraps = new ArrayList<>();
+
     private void observeTraps() {
-        // Observe "Ready to Upload" and save to local list
+        trapViewModel.getAllTrapsWithResults(currentUserId).observe(getViewLifecycleOwner(), results -> {
+            finishedTrapTitles.clear();
+            if (results != null) {
+                for (TrapWithResults tr : results) {
+                    if (!tr.results.isEmpty() || "analyzed".equals(tr.trap.getStatus())) {
+                        finishedTrapTitles.add(tr.trap.getTitle());
+                    }
+                }
+            }
+            if (currentQueuedTraps != null) {
+                updateSection(queuedContainer, currentQueuedTraps, "queued");
+            }
+        });
+
+        trapViewModel.getQueuedTraps(currentUserId).observe(getViewLifecycleOwner(), traps -> {
+            this.currentQueuedTraps = traps;
+            updateSection(queuedContainer, traps, "queued");
+        });
+
         trapViewModel.getReadyToUploadTraps(currentUserId).observe(getViewLifecycleOwner(), traps -> {
-            this.currentReadyTraps = traps != null ? traps : new ArrayList<>();
+            this.currentReadyTraps = traps;
             updateSection(readyToUploadContainer, traps, "ready");
         });
 
         trapViewModel.getUploadingTraps(currentUserId).observe(getViewLifecycleOwner(), traps -> {
             updateSection(uploadingContainer, traps, "uploading");
-        });
-
-        trapViewModel.getQueuedTraps(currentUserId).observe(getViewLifecycleOwner(), traps -> {
-            updateSection(queuedContainer, traps, "queued");
         });
     }
 
@@ -96,11 +114,17 @@ public class QueueFragment extends Fragment {
         container.removeAllViews();
 
         if (traps == null || traps.isEmpty()) {
-            Log.d("QueueDebug", "No traps found for section: " + type);
             return;
         }
 
         for (Trap trap : traps) {
+            String trapTitle = trap.getTitle();
+
+            // סינון תוצאות כפולות (מהתיקון הקודם)
+            if (type.equals("queued") && finishedTrapTitles.contains(trapTitle)) {
+                continue;
+            }
+
             View itemView = LayoutInflater.from(requireContext())
                     .inflate(R.layout.item_upload_queue, container, false);
 
@@ -111,36 +135,20 @@ public class QueueFragment extends Fragment {
             if (titleText != null) titleText.setText(trap.getTitle());
 
             String imagePath = trap.getImagePath();
-            Log.d("QueueDebug", "Checking Trap: " + trap.getTitle());
-            Log.d("QueueDebug", "Path from DB: " + imagePath);
-
             if (thumbnailView != null && imagePath != null) {
                 File imgFile = new File(imagePath);
-                boolean exists = imgFile.exists();
-                Log.d("QueueDebug", "File exists? " + exists);
-
-                if (exists) {
-                    Log.d("QueueDebug", "File size: " + imgFile.length() + " bytes");
+                if (imgFile.exists()) {
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inJustDecodeBounds = false;
                         options.inSampleSize = 8;
-
                         Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath(), options);
-
                         if (bitmap != null) {
-                            Log.d("QueueDebug", "Bitmap created! Width: " + bitmap.getWidth());
                             thumbnailView.setImageBitmap(bitmap);
                             thumbnailView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                        } else {
-                            Log.e("QueueDebug", "Bitmap is NULL");
                         }
                     } catch (Exception e) {
-                        Log.e("QueueDebug", "EXCEPTION: " + e.getMessage());
                         e.printStackTrace();
                     }
-                } else {
-                    Log.e("QueueDebug", "File does NOT exist!");
                 }
             }
 
@@ -149,7 +157,12 @@ public class QueueFragment extends Fragment {
                 if (type.equals("ready")) {
                     statusText.setText("Ready • " + sizeStr);
                 } else if (type.equals("uploading")) {
-                    statusText.setText("Uploading...");
+                    // כאן נוכל להציג הודעה חכמה יותר אם אין אינטרנט
+                    if (!NetworkUtils.isNetworkAvailable(requireContext())) {
+                        statusText.setText("Waiting for internet connection...");
+                    } else {
+                        statusText.setText("Uploading...");
+                    }
                 } else {
                     statusText.setText("Uploaded • Waiting for analysis");
                 }
@@ -160,6 +173,13 @@ public class QueueFragment extends Fragment {
                 if (type.equals("ready")) {
                     itemUploadBtn.setVisibility(View.VISIBLE);
                     itemUploadBtn.setOnClickListener(v -> {
+                        // 🟢 שינוי: לא חוסמים, רק מודיעים וממשיכים
+                        if (!NetworkUtils.isNetworkAvailable(requireContext())) {
+                            Toast.makeText(requireContext(),
+                                    "No internet. Added to upload queue.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        // הפונקציה הזו תשנה את הסטטוס ל-uploading מיד
                         trapViewModel.uploadTrap(trap, String.valueOf(currentUserId));
                     });
                 } else {
@@ -173,12 +193,17 @@ public class QueueFragment extends Fragment {
 
     private void setupClickListeners() {
         uploadAllButton.setOnClickListener(v -> {
-            // Check if there are traps to upload
             if (currentReadyTraps == null || currentReadyTraps.isEmpty()) {
                 return;
             }
 
-            // Upload from the cached list, NOT creating a new observer
+            // 🟢 שינוי: גם כאן, לא חוסמים, רק מודיעים
+            if (!NetworkUtils.isNetworkAvailable(requireContext())) {
+                Toast.makeText(requireContext(),
+                        "No internet. All items added to upload queue.",
+                        Toast.LENGTH_LONG).show();
+            }
+
             for (Trap trap : currentReadyTraps) {
                 trapViewModel.uploadTrap(trap, String.valueOf(currentUserId));
             }

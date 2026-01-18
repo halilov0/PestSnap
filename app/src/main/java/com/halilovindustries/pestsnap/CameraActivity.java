@@ -146,8 +146,7 @@ public class CameraActivity extends AppCompatActivity {
 
         try {
             // Bind without imageAnalysis
-            cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture);
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
         } catch (Exception e) {
             Log.e(TAG, "Use case binding failed", e);
         }

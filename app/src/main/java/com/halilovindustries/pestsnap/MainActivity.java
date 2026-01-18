@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
 
         super.onCreate(savedInstanceState);
+        android.util.Log.e("MainActivity", "===== APP STARTED =====");
         setContentView(R.layout.activity_main);
 
         // CHANGE: Initialize the FIELD variable, not a local one

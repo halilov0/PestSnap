@@ -91,5 +91,6 @@ public class TrapViewModel extends AndroidViewModel {
 
     // saves the trap to the database
     public void update(Trap trap) {
+        trapRepository.update(trap);  // ← ADD THIS LINE
     }
 }

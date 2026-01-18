@@ -12,7 +12,6 @@ import com.halilovindustries.pestsnap.data.model.TrapWithResults;
 import androidx.room.OnConflictStrategy;
 
 import java.util.List;
-
 @Dao
 public interface TrapDao {
     @Insert
@@ -27,12 +26,20 @@ public interface TrapDao {
     @Query("SELECT * FROM traps WHERE id = :trapId LIMIT 1")
     LiveData<Trap> getTrapById(int trapId);
 
+    // 🆕 ADD THIS - Sync version (no LiveData)
+    @Query("SELECT * FROM traps WHERE id = :trapId LIMIT 1")
+    Trap getTrapByIdSync(int trapId);
+
     @Transaction
     @Query("SELECT * FROM traps WHERE userId = :userId ORDER BY capturedAt DESC")
     LiveData<List<TrapWithResults>> getTrapsWithResults(int userId);
 
     @Query("SELECT * FROM traps WHERE status = :status AND userId = :userId")
     LiveData<List<Trap>> getTrapsByStatus(int userId, String status);
+
+    // 🆕 ADD THIS - Sync version for retry logic
+    @Query("SELECT * FROM traps WHERE status = :status")
+    List<Trap> getTrapsByStatusSync(String status);
 
     @Query("UPDATE traps SET status = :status WHERE id = :trapId")
     void updateTrapStatus(int trapId, String status);

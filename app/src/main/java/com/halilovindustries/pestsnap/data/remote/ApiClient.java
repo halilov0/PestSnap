@@ -1,11 +1,10 @@
 package com.halilovindustries.pestsnap.data.remote;
 
-import java.security.cert.CertificateException;
+import android.util.Log;
+
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -14,66 +13,73 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-// חשוב: אם אתה משתמש ב-getStatus שמחזיר String, צריך גם את זה:
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ApiClient {
-    // הכתובת הבסיסית (בלי pestsnap/upload בסוף)
-    private static final String BASE_URL = "https://stardbi.cs.bgu.ac.il/";
+    private static final String TAG = "ApiClient";
+    private static final boolean USE_MOCK = true;
+    private static final String REAL_BASE_URL = "https://stardbi.cs.bgu.ac.il/";
     private static Retrofit retrofit;
 
     public static STARdbiApi getApiService() {
+        Log.e(TAG, "===== getApiService() CALLED =====");
         return getRetrofitInstance().create(STARdbiApi.class);
     }
 
     private static Retrofit getRetrofitInstance() {
+        Log.e(TAG, "===== getRetrofitInstance() CALLED =====");
+
         if (retrofit == null) {
-            // הוספת לוגים כדי לראות מה נשלח
+            Log.e(TAG, "Retrofit is NULL - creating new instance");
+            Log.e(TAG, "USE_MOCK = " + USE_MOCK);
+
+            String baseUrl;
+            if (USE_MOCK) {
+                Log.e(TAG, "Starting MockWebServer...");
+                baseUrl = MockApiService.startMockServer();
+                Log.e(TAG, "MockWebServer URL: " + baseUrl);
+            } else {
+                baseUrl = REAL_BASE_URL;
+            }
+
+            if (baseUrl == null) {
+                Log.e(TAG, "❌ BASE URL IS NULL!");
+                throw new RuntimeException("Failed to get base URL");
+            }
+
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            // שימוש בלקוח ה"לא בטוח" כדי לעקוף את שגיאת ה-SSL של האוניברסיטה
-            OkHttpClient client = getUnsafeOkHttpClient(loggingInterceptor);
+            OkHttpClient client = USE_MOCK ?
+                    getSafeOkHttpClient(loggingInterceptor) :
+                    getUnsafeOkHttpClient(loggingInterceptor);
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(baseUrl)
                     .client(client)
-                    .addConverterFactory(ScalarsConverterFactory.create()) // בשביל קבלת String בסטטוס
-                    .addConverterFactory(GsonConverterFactory.create())    // בשביל קבלת JSON בהעלאה
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create())
                     .build();
+
+            Log.e(TAG, "✅ Retrofit instance created successfully");
+        } else {
+            Log.e(TAG, "Retrofit already exists - reusing instance");
         }
+
         return retrofit;
     }
 
-    // --- הקסם שפותר את קריסות האבטחה ---
+    private static OkHttpClient getSafeOkHttpClient(HttpLoggingInterceptor loggingInterceptor) {
+        return new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
+    }
+
     private static OkHttpClient getUnsafeOkHttpClient(HttpLoggingInterceptor loggingInterceptor) {
-        try {
-            // יצירת TrustManager שסומך על כולם
-            final TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
-                        @Override
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
-                        @Override
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[]{}; }
-                    }
-            };
-
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-            return new OkHttpClient.Builder()
-                    .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0])
-                    .hostnameVerifier((hostname, session) -> true) // ביטול אימות Hostname
-                    .addInterceptor(loggingInterceptor)
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(30, TimeUnit.SECONDS)
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // ... keep your existing implementation
+        return getSafeOkHttpClient(loggingInterceptor); // placeholder
     }
 }
