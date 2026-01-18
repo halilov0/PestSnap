@@ -146,8 +146,7 @@ public class CameraActivity extends AppCompatActivity {
 
         try {
             // Bind without imageAnalysis
-            cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture);
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
         } catch (Exception e) {
             Log.e(TAG, "Use case binding failed", e);
         }
@@ -176,7 +175,6 @@ public class CameraActivity extends AppCompatActivity {
         if (imageCapture == null) return;
 
         captureButton.setEnabled(false);
-        Toast.makeText(this, "Capturing...", Toast.LENGTH_SHORT).show();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
         String timestamp = dateFormat.format(new Date());

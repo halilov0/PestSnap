@@ -61,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 authViewModel.loginUser(email, password);
                 authViewModel.getAuthMessage().observe(LoginActivity.this, message -> {
-                    Toast.makeText(LoginActivity.this, message, message.length()).show();
+                    //Toast.makeText(LoginActivity.this, message, message.length()).show();
                     if("Login successful".equals(message)) {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);

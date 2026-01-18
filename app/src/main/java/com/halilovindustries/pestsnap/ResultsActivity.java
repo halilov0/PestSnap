@@ -1,28 +1,34 @@
 package com.halilovindustries.pestsnap;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.halilovindustries.pestsnap.data.model.PestResult;
-import com.halilovindustries.pestsnap.data.model.Trap;
 import com.halilovindustries.pestsnap.data.model.TrapWithResults;
+import com.halilovindustries.pestsnap.data.repository.UserRepository;
+import com.halilovindustries.pestsnap.viewmodel.TrapViewModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ResultsActivity extends AppCompatActivity {
+    private static final String TAG = "ResultsActivity";
 
     private TextView pageTitle;
     private Button backButton;
     private RecyclerView resultsRecyclerView;
     private ResultsAdapter adapter;
+
+    private TrapViewModel trapViewModel;
+    private UserRepository userRepository;
+    private int currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +36,14 @@ public class ResultsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_results);
 
         initializeViews();
+
+        // Initialize Data Layer
+        userRepository = new UserRepository(this);
+        currentUserId = userRepository.getCurrentUserId();
+        if (currentUserId == -1) currentUserId = 1;
+
+        trapViewModel = new ViewModelProvider(this).get(TrapViewModel.class);
+
         loadResults();
         setupClickListeners();
     }
@@ -41,73 +55,35 @@ public class ResultsActivity extends AppCompatActivity {
 
         // Setup RecyclerView
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-    }
 
-    private void loadResults() {
-        // Get data from intent if passed
-        String trapTitle = getIntent().getStringExtra("trapTitle");
-
-        if (trapTitle != null) {
-            pageTitle.setText("Result Details");
-        } else {
-            pageTitle.setText("Results");
-        }
-
-        // Create sample data using your existing models
-        List<TrapWithResults> results = createSampleResults();
-
-        // Set adapter
-        adapter = new ResultsAdapter(results);
+        // Initialize with empty adapter
+        adapter = new ResultsAdapter(new ArrayList<>());
         resultsRecyclerView.setAdapter(adapter);
     }
 
-    private List<TrapWithResults> createSampleResults() {
-        List<TrapWithResults> trapResults = new ArrayList<>();
+    private void loadResults() {
+        pageTitle.setText("Results");
 
-        // Trap 1 - Single pest detected
-        Trap trap1 = new Trap(1, "Trap #1 - South Field", "/path/image1.jpg",
-                31.2612, 34.7991, 4.2f, 95, true);
-        trap1.setId(1);
-        trap1.setStatus("analyzed");
-        trap1.setCapturedAt(System.currentTimeMillis() - 86400000); // Yesterday
+        // 🆕 Observe REAL database data for "analyzed" traps
+        trapViewModel.getAllTrapsWithResults(currentUserId).observe(this, trapResults -> {
+            Log.d(TAG, "📊 Results changed - Count: " + (trapResults != null ? trapResults.size() : 0));
 
-        PestResult pest1 = new PestResult(1, "Thrips", "Frankliniella",
-                8, 0.79f, null, false);
-        pest1.setAnalyzedAt(trap1.getCapturedAt());
+            if (trapResults != null) {
+                // Filter only "analyzed" traps
+                List<TrapWithResults> analyzedTraps = new ArrayList<>();
+                for (TrapWithResults tr : trapResults) {
+                    if ("analyzed".equals(tr.trap.getStatus())) {
+                        analyzedTraps.add(tr);
+                        Log.d(TAG, "  → ANALYZED Trap: " + tr.trap.getTitle() + " with " + tr.results.size() + " pests");
+                    }
+                }
 
-        trapResults.add(new TrapWithResults(trap1, Arrays.asList(pest1)));
-
-        // Trap 2 - High infestation with warning
-        Trap trap2 = new Trap(1, "Trap #2 - West Greenhouse", "/path/image2.jpg",
-                31.2612, 34.7991, 3.8f, 92, true);
-        trap2.setId(2);
-        trap2.setStatus("analyzed");
-        trap2.setCapturedAt(System.currentTimeMillis() - 90000000);
-
-        PestResult pest2 = new PestResult(2, "Leafminer", "Liriomyza",
-                42, 0.96f, "High infestation detected. Immediate intervention recommended.", true);
-        pest2.setAnalyzedAt(trap2.getCapturedAt());
-
-        trapResults.add(new TrapWithResults(trap2, Arrays.asList(pest2)));
-
-        // Trap 3 - No pests detected
-        Trap trap3 = new Trap(1, "Trap #3 - Center Field", "/path/image3.jpg",
-                31.2612, 34.7991, 4.0f, 98, true);
-        trap3.setId(3);
-        trap3.setStatus("analyzed");
-        trap3.setCapturedAt(System.currentTimeMillis());
-
-        trapResults.add(new TrapWithResults(trap3, new ArrayList<>()));
-
-        return trapResults;
+                adapter.updateResults(analyzedTraps);
+            }
+        });
     }
 
     private void setupClickListeners() {
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        backButton.setOnClickListener(v -> finish());
     }
 }

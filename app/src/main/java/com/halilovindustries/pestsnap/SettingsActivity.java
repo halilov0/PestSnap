@@ -65,7 +65,7 @@ public class SettingsActivity extends AppCompatActivity {
             // Clear authentication state
             authViewModel.logout();
 
-            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
 
             // Navigate to LoginActivity
             Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);

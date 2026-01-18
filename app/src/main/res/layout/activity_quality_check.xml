@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FCFCF9"
+    android:background="@color/background"
     android:fillViewport="true">
 
     <LinearLayout
@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:text="Quality Check"
-                android:textColor="#134252"
+                android:textColor="@color/text_primary"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif" />
@@ -36,8 +36,9 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:text="Back"
-                android:textColor="#134252"
+                android:textColor="@color/primary"
                 android:textSize="14sp"
+                android:textStyle="bold"
                 android:textAllCaps="false"
                 android:fontFamily="sans-serif"
                 android:paddingStart="16dp"
@@ -53,7 +54,7 @@
             android:layout_marginBottom="20dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/surface">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -65,7 +66,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="✓ Image Quality: PASS"
-                    android:textColor="#134252"
+                    android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:fontFamily="sans-serif"
@@ -75,7 +76,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Your image meets quality requirements. Ready for upload when you're done capturing."
-                    android:textColor="#627077"
+                    android:textColor="@color/text_secondary"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif"
                     android:lineSpacingMultiplier="1.5" />
@@ -89,7 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Quality Metrics"
-            android:textColor="#134252"
+            android:textColor="@color/text_primary"
             android:textSize="13sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif"
@@ -111,8 +112,8 @@
                 android:layout_marginEnd="6dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#F0F8F9"
-                app:strokeColor="#218089"
+                app:cardBackgroundColor="@color/success_bg"
+                app:strokeColor="@color/success"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -125,7 +126,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Trap Detected?"
-                        android:textColor="#134252"
+                        android:textColor="@color/text_primary"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif"
@@ -136,7 +137,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="YES"
-                        android:textColor="#218089"
+                        android:textColor="@color/success"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif" />
@@ -153,7 +154,7 @@
                 android:layout_marginStart="6dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -165,7 +166,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Sharpness"
-                        android:textColor="#134252"
+                        android:textColor="@color/text_primary"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif"
@@ -176,7 +177,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="95%"
-                        android:textColor="#218089"
+                        android:textColor="@color/success"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif" />
@@ -203,7 +204,7 @@
                 android:layout_marginEnd="6dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -215,7 +216,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Exposure"
-                        android:textColor="#134252"
+                        android:textColor="@color/text_primary"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif"
@@ -226,7 +227,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Optimal"
-                        android:textColor="#218089"
+                        android:textColor="@color/success"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif" />
@@ -243,7 +244,7 @@
                 android:layout_marginStart="6dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -255,7 +256,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Frame"
-                        android:textColor="#134252"
+                        android:textColor="@color/text_primary"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif"
@@ -266,7 +267,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Perfect"
-                        android:textColor="#218089"
+                        android:textColor="@color/success"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif" />
@@ -296,8 +297,9 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:text="Retake Image"
-            android:textColor="#134252"
+            android:textColor="@color/primary"
             android:textSize="16sp"
+            android:textStyle="bold"
             android:textAllCaps="false"
             android:fontFamily="sans-serif"
             android:background="@drawable/btn_outline_background" />
